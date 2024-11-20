@@ -2,7 +2,7 @@
 <html>
 <head>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <title>Simulador de Doble Péndulo con Pantalla Completa</title>
+  <title>Simulador de Péndulo Doble</title>
   <style>
 body {
   background-color: #f0f4f8; /* Fondo suave */
@@ -180,11 +180,11 @@ a:hover {
 
     <div id="pendulum1Params">
         <div>Péndulo 1:</div>
-        <label>Longitud 1 (cm, 5 a 125):
-        <input type="number" id="length1Input0" value="50" min="5" max="125" onchange="updateParameters()">
+        <label>Longitud 1 (cm, 5 a 100):
+        <input type="number" id="length1Input0" value="50" min="5" max="100" onchange="updateParameters()">
         </label><br>
-        <label>Longitud 2 (cm, 5 a 125):
-        <input type="number" id="length2Input0" value="50" min="5" max="125" onchange="updateParameters()">
+        <label>Longitud 2 (cm, 5 a 100):
+        <input type="number" id="length2Input0" value="50" min="5" max="100" onchange="updateParameters()">
         </label><br>
         <label>Masa 1 (kg, 0.1 a 20):
         <input type="number" id="mass1Input0" value="5" min="0.1" max="20" onchange="updateParameters()">
@@ -193,10 +193,10 @@ a:hover {
         <input type="number" id="mass2Input0" value="5" min="0.1" max="20" onchange="updateParameters()">
         </label><br>
         <label>Ángulo 1 (°):
-        <input type="number" id="angle1Input0" value="90" min="-360" max="360" onchange="updateParameters()">
+        <input type="number" id="angle1Input0" value="90" min="0" max="360" onchange="updateParameters()">
         </label><br>
         <label>Ángulo 2 (°):
-        <input type="number" id="angle2Input0" value="90" min="-360" max="360" onchange="updateParameters()">
+        <input type="number" id="angle2Input0" value="90" min="0" max="360" onchange="updateParameters()">
         </label><br>
         <label>Color:
         <input type="color" id="colorInput0" value="#FF0000" onchange="updateParameters()">
@@ -205,11 +205,11 @@ a:hover {
 
     <div id="pendulum2Params">
       <div>Péndulo 2:</div>
-      <label>Longitud 1 (cm, 5 a 125):
-        <input type="number" id="length1Input1" value="50" min="5" max="125" onchange="updateParameters()">
+      <label>Longitud 1 (cm, 5 a 100):
+        <input type="number" id="length1Input1" value="50" min="5" max="100" onchange="updateParameters()">
       </label><br>
-      <label>Longitud 2 (cm, 5 a 125):
-        <input type="number" id="length2Input1" value="50" min="5" max="125" onchange="updateParameters()">
+      <label>Longitud 2 (cm, 5 a 100):
+        <input type="number" id="length2Input1" value="50" min="5" max="100" onchange="updateParameters()">
       </label><br>
       <label>Masa 1 (kg, 0.1 a 20):
         <input type="number" id="mass1Input1" value="5" min="0.1" max="20" onchange="updateParameters()">
@@ -218,10 +218,10 @@ a:hover {
         <input type="number" id="mass2Input1" value="5" min="0.1" max="20" onchange="updateParameters()">
       </label><br>
       <label>Ángulo 1 (°):
-        <input type="number" id="angle1Input1" value="-90" min="-360" max="360" onchange="updateParameters()">
+        <input type="number" id="angle1Input1" value="0" min="0" max="360" onchange="updateParameters()">
       </label><br>
       <label>Ángulo 2 (°):
-        <input type="number" id="angle2Input1" value="-90" min="-360" max="360" onchange="updateParameters()">
+        <input type="number" id="angle2Input1" value="0" min="0" max="360" onchange="updateParameters()">
       </label><br>
       <label>Color:
         <input type="color" id="colorInput1" value="#0000FF" onchange="updateParameters()">
@@ -241,7 +241,7 @@ a:hover {
       <div id="pendulumCanvas"></div>
     </div>
     <div class="canvas-wrapper">
-      <h2 id="phasePortraitCanvasTitle">Retrato Fase</h2>
+      <h2 id="phasePortraitCanvasTitle">Retrato de Ángulos</h2>
       <div id="phasePortraitCanvas"></div>
     </div>
   </div>
@@ -471,15 +471,33 @@ a:hover {
       });
     }
 
+    function normalizeAngle(angle) {
+      while (angle > Math.PI) {
+        angle -= 2 * Math.PI;
+      }
+      while (angle < -Math.PI) {
+        angle += 2 * Math.PI;
+      }
+      return angle;
+    }
+
     function drawPhasePortrait() {
       pendulums.forEach((p, index) => {
         if (index === 1 && !showSecondPendulum) return;
 
-        let x = map(p.a1, -PI, PI, 0, 600);
-        let y = map(p.a2, -PI, PI, 600, 0); // Invertir el eje y para una visualización estándar
+        // Normalizar los ángulos
+        let normalizedTheta1 = normalizeAngle(p.a1);
+        let normalizedTheta2 = normalizeAngle(p.a2);
+
+        // Mapear al rango del lienzo
+        let x = map(normalizedTheta1, -Math.PI, Math.PI, 0, 400);
+        let y = map(normalizedTheta2, -Math.PI, Math.PI, 400, 0); // Invertir eje Y
+
         phaseBuffer.stroke(colors[index]);
         phaseBuffer.strokeWeight(1);
         phaseBuffer.point(x, y);
+        console.log(`Theta1: ${normalizedTheta1}, Theta2: ${normalizedTheta2}`);
+
       });
     }
 
