@@ -241,7 +241,7 @@ a:hover {
       <div id="pendulumCanvas"></div>
     </div>
     <div class="canvas-wrapper">
-      <h2 id="phasePortraitCanvasTitle">Retrato de Ángulos</h2>
+      <h2 id="phasePortraitCanvasTitle">Gráfico de Ángulos</h2>
       <div id="phasePortraitCanvas"></div>
     </div>
   </div>
@@ -258,7 +258,7 @@ a:hover {
     let colors = ["#FF0000", "#0000FF"];
     let gravity = 9.8;
     let showSecondPendulum = false; // Comenzar con un solo péndulo
-    let dt = 0.05; // Paso de tiempo para RK4
+    let dt = 0.035; // Paso de tiempo para RK4
     let elapsedTime = 0; // Tiempo transcurrido en segundos
     let canvasSize; // Tamaño del cuadrado
 
@@ -327,8 +327,8 @@ a:hover {
           r2: 50,
           m1: 5,
           m2: 5,
-          a1: -PI / 2,
-          a2: -PI / 2,
+          a1: 0,
+          a2: 0,
           a1_v: 0,
           a2_v: 0,
           px2: cx,
@@ -366,13 +366,28 @@ a:hover {
     function startSimulation() {
       simulationStarted = true;
       simulationPaused = false;
+      startTime = Date.now(); // Registrar el tiempo actual
+      pausedTime = 0; // Reiniciar tiempo acumulado en pausas
       loop();
     }
+    let startTime = 0; // Tiempo absoluto de inicio/reanudación
+    let pausedTime = 0; // Tiempo acumulado en pausas
 
+    function updateElapsedTime() {
+      if (!simulationPaused && simulationStarted) {
+        // Calcular tiempo real transcurrido desde el inicio/reanudación
+        const currentTime = Date.now();
+        elapsedTime = (currentTime - startTime) / 1000 + pausedTime; // Convertir a segundos
+        document.getElementById("timeCounter").textContent = elapsedTime.toFixed(2);
+      }
+    }
 
     function resetSimulation() {
       simulationStarted = false;
       simulationPaused = false;
+      elapsedTime = 0;
+      pausedTime = 0;
+      startTime = 0;
       buffer.background(250);
       phaseBuffer.background(250);
       initializePendulums();
@@ -385,10 +400,12 @@ a:hover {
       if (simulationStarted) {
         if (simulationPaused) {
           simulationPaused = false;
+          startTime = Date.now(); // Reanudar desde ahora
           loop();
           document.getElementById("pauseButton").textContent = "Pausar Simulación";
         } else {
           simulationPaused = true;
+          pausedTime += (Date.now() - startTime) / 1000; // Acumular tiempo pausado
           noLoop();
           document.getElementById("pauseButton").textContent = "Reanudar Simulación";
         }
@@ -425,9 +442,10 @@ a:hover {
             updatePendulumsRK4();
             drawTrace();
             drawPhasePortrait();
+            updateElapsedTime(); // Actualizar tiempo del cronómetro
 
             // Actualizar el tiempo transcurrido
-            elapsedTime += dt;
+//            elapsedTime += dt;
             document.getElementById("timeCounter").textContent = elapsedTime.toFixed(2);
         }
     }
